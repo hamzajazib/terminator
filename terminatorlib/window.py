@@ -1037,8 +1037,7 @@ class Window(Container, Gtk.Window):
         notebook.reorder_child(child, page)
 
     def detach_tab_to_new_window(self, widget):
-        """Handle a request to detach the tab containing widget into a
-        new window"""
+        """Detach the tab containing widget into a new window"""
         if self.is_zoomed():
             self.unzoom()
 

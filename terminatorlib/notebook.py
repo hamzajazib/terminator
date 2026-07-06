@@ -80,12 +80,7 @@ class Notebook(Container, Gtk.Notebook):
         self.last_active_term = {}
 
     def create_window_detach(self, notebook, widget, x, y):
-        """A tab has been dropped outside any tab bar. GTK emits this
-        signal in the middle of its drag-and-drop bookkeeping; removing
-        the page here (and potentially dissolving this notebook via
-        hoover) leaves GTK dereferencing freed drag state afterwards,
-        crashing the whole process (issue #1022). Defer the detach until
-        the drag has fully ended."""
+        """Defer detaching a dropped tab until the drag has ended (#1022)"""
         dbg('deferring detach of dropped tab: %s' % widget)
         GObject.idle_add(self.detach_tab_to_new_window, widget, x, y)
 
@@ -113,9 +108,7 @@ class Notebook(Container, Gtk.Notebook):
         return False
 
     def on_tab_drag_failed(self, notebook, context, result):
-        """After a failed tab drag, force a re-allocation: under Wayland
-        the restored tab label is sometimes not redrawn until the next
-        mouse-over (GTK issue #3143)"""
+        """Re-allocate after a failed tab drag so the label repaints (GTK#3143)"""
         GObject.idle_add(self.queue_resize)
         return False
 
