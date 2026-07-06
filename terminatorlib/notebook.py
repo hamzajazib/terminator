@@ -80,7 +80,7 @@ class Notebook(Container, Gtk.Notebook):
         self.last_active_term = {}
 
     def create_window_detach(self, notebook, widget, x, y):
-        """Defer detaching a dropped tab until the drag has ended (#1022)"""
+        """Defer detaching a dropped tab until the drag has ended"""
         dbg('deferring detach of dropped tab: %s' % widget)
         GObject.idle_add(self.detach_tab_to_new_window, widget, x, y)
 
@@ -108,7 +108,7 @@ class Notebook(Container, Gtk.Notebook):
         return False
 
     def on_tab_drag_failed(self, notebook, context, result):
-        """Re-allocate after a failed tab drag so the label repaints (GTK#3143)"""
+        """Re-allocate after a failed tab drag so the label repaints"""
         GObject.idle_add(self.queue_resize)
         return False
 
