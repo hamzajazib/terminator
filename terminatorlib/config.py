@@ -207,7 +207,8 @@ DEFAULTS = {
             'previous_profile' : '', 
             'preferences'      : '',
             'preferences_keybindings' : '<Control><Shift>k',
-            'help'             : 'F1'
+            'help'             : 'F1',
+            'detach_tab'       : '<Shift><Control>d'
         },
         'profiles': {
             'default':  {
