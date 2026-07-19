@@ -1121,11 +1121,17 @@ class Terminal(Gtk.VBox):
                 dbg('url: %s' % url)
                 if url:
                     self.open_url(url, prepare=False)
+                    # Consume the event: the click we just acted on must not
+                    # also be forwarded to the application underneath. Apps that
+                    # enable mouse reporting and treat Ctrl+click as "open link"
+                    # (e.g. TUIs) would otherwise open the same URL a second time.
+                    return True
                 else:
                     dbg('OSC-8 URL not detected dropping back to regex match')
                     url = self.vte.match_check_event(event)
                     if url[0]:
                         self.open_url(url, prepare=True)
+                        return True
                     else:
                         dbg("No regex match, discard event.")
         elif event.button == self.MOUSEBUTTON_MIDDLE:
