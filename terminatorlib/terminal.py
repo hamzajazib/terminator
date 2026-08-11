@@ -1114,8 +1114,13 @@ class Terminal(Gtk.VBox):
 
         # Ctrl-click event here.
         if event.button == self.MOUSEBUTTON_LEFT:
-            # Ctrl+leftclick on a URL should open it
-            if self.config["link_single_click"] or event.get_state() & Gdk.ModifierType.CONTROL_MASK == Gdk.ModifierType.CONTROL_MASK:
+            # Ctrl+leftclick on a URL should open it. Only the initial press
+            # counts: GDK reports a double-click as BUTTON_PRESS followed by
+            # _2BUTTON_PRESS, so acting on every event type would open the URL
+            # once per event.
+            if (event.type == Gdk.EventType.BUTTON_PRESS
+                    and (self.config["link_single_click"]
+                         or event.get_state() & Gdk.ModifierType.CONTROL_MASK == Gdk.ModifierType.CONTROL_MASK)):
                 # Check new OSC-8 method first
                 url = self.vte.hyperlink_check_event(event)
                 dbg('url: %s' % url)
