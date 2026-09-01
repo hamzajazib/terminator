@@ -221,6 +221,7 @@ DEFAULTS = {
                 'background_type'       : 'solid',
                 'background_image'      : '',
                 'background_image_mode' : 'stretch_and_fill',
+                'background_image_span_window': False,
                 'background_image_align_horiz': 'center',
                 'background_image_align_vert' : 'middle',
                 'background_blur'       : False,
