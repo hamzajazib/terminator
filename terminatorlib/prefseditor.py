@@ -241,11 +241,15 @@ class PrefsEditor:
     def on_destroy_event(self, _widget):
         self.config.base.remove_config_with_suffix('_cur')
 
+    def on_applybutton_clicked(self, _button):
+        """Apply configuration changes without closing the window"""
+        terminator = Terminator()
+        terminator.reconfigure()
+
     def on_closebutton_clicked(self, _button):
         """Close the window"""
         self.config.base.remove_config_with_suffix('_cur')
-        terminator = Terminator()
-        terminator.reconfigure()
+        self.on_applybutton_clicked(_button)
         self.window.destroy()
         self.calling_window.preventHide = False
         del(self)
