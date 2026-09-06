@@ -84,6 +84,23 @@ class TerminalPopupMenu(object):
                                 Gtk.AccelFlags.VISIBLE)
         return item
 
+    def close_terminal(self, _menuitem=None):
+        """Close the terminal after applying the normal close confirmation."""
+        terminal = self.terminal
+        container = terminal.get_parent()
+
+        while container and not hasattr(container, 'construct_confirm_close'):
+            container = container.get_parent()
+
+        if container:
+            confirm_close = container.construct_confirm_close(
+                terminal.get_toplevel(), terminal)
+            if confirm_close != Gtk.ResponseType.ACCEPT:
+                dbg('user cancelled request')
+                return
+
+        terminal.close()
+
     def show(self, widget, event=None):
         """Display the context menu"""
         terminal = self.terminal
@@ -224,7 +241,7 @@ class TerminalPopupMenu(object):
             menu.append(Gtk.SeparatorMenuItem())
 
         item = self.menu_item(Gtk.ImageMenuItem, 'close_term', _('_Close'))
-        item.connect('activate', lambda x: terminal.close())
+        item.connect('activate', self.close_terminal)
         menu.append(item)
 
         menu.append(Gtk.SeparatorMenuItem())
