@@ -1,6 +1,6 @@
 # Terminator by Chris Jones <cmsj@tenshu.net>
 # GPL v2 only
-"""terminal_popup_menu.py - classes necessary to provide a terminal context 
+"""terminal_popup_menu.py - classes necessary to provide a terminal context
 menu"""
 
 from gi.repository import Gtk, Gdk
@@ -114,7 +114,27 @@ class TerminalPopupMenu(object):
         self.config.set_profile(terminal.get_profile())
 
         if event:
-            url = terminal.vte.match_check_event(event)
+            url = terminal.vte.hyperlink_check_event(event)
+
+            if url:
+                tag = None
+
+                for pattern, tag in terminal.matches.items():
+                    try:
+                        if re.search(pattern, url):
+                            tag = tag
+
+                            break
+                    except Exception:
+                        continue
+
+                if tag is not None:
+                    url = [url, tag]
+                else:
+                    url = terminal.vte.match_check_event(event)
+            else:
+                url = terminal.vte.match_check_event(event)
+
             button = event.button
             time = event.time
         else:
@@ -163,11 +183,13 @@ class TerminalPopupMenu(object):
                                             Gtk.IconSize.MENU)
             item = Gtk.ImageMenuItem.new_with_mnemonic(nameopen)
             item.set_property('image', icon)
+            item.set_tooltip_text(url[0])
             item.connect('activate', lambda x: terminal.open_url(url, True))
             menu.append(item)
 
             item = Gtk.MenuItem.new_with_mnemonic(namecopy)
-            item.connect('activate', 
+            item.set_tooltip_text(url[0])
+            item.connect('activate',
                          lambda x: terminal.clipboard.set_text(terminal.prepare_url(url), len(terminal.prepare_url(url))))
             menu.append(item)
 
@@ -189,7 +211,7 @@ class TerminalPopupMenu(object):
                                                  _('Set _Window Title'))
         item.connect('activate', lambda x: terminal.key_edit_window_title())
         menu.append(item)
-        
+
         if not terminal.is_zoomed():
             item = self.menu_item(Gtk.ImageMenuItem, 'split_auto',
                                                      _('Split _Auto'))
@@ -370,7 +392,7 @@ class TerminalPopupMenu(object):
             plugins = registry.get_plugins_by_capability('terminal_menu')
             for menuplugin in plugins:
                 menuplugin.callback(menuitems, menu, terminal)
-            
+
             if len(menuitems) > 0:
                 menu.append(Gtk.SeparatorMenuItem())
 
