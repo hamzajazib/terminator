@@ -238,6 +238,13 @@ class TerminalPopupMenu(object):
                         terminal.emit('tab-new', True, terminal))
                 menu.append(item)
 
+            if isinstance(terminal.get_toplevel().get_child(), Gtk.Notebook):
+                item = self.menu_item(Gtk.MenuItem, 'detach_tab',
+                                                    _('Detach Ta_b'))
+                item.connect('activate', lambda x:
+                        terminal.emit('detach-tab'))
+                menu.append(item)
+
             menu.append(Gtk.SeparatorMenuItem())
 
         item = self.menu_item(Gtk.ImageMenuItem, 'close_term', _('_Close'))

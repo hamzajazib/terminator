@@ -74,6 +74,7 @@ class Terminal(Gtk.VBox):
         'group-all-toggle': (GObject.SignalFlags.RUN_LAST, None, ()),
         'move-tab': (GObject.SignalFlags.RUN_LAST, None,
             (GObject.TYPE_STRING,)),
+        'detach-tab': (GObject.SignalFlags.RUN_LAST, None, ()),
         'group-win': (GObject.SignalFlags.RUN_LAST, None, ()),
         'group-win-toggle': (GObject.SignalFlags.RUN_LAST, None, ()),
         'ungroup-win': (GObject.SignalFlags.RUN_LAST, None, ()),
@@ -2117,6 +2118,9 @@ class Terminal(Gtk.VBox):
 
     def key_move_tab_left(self):
         self.emit('move-tab', 'left')
+
+    def key_detach_tab(self):
+        self.emit('detach-tab')
 
     def key_toggle_zoom(self):
         if self.is_zoomed():

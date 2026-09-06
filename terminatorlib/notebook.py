@@ -38,6 +38,7 @@ class Notebook(Container, Gtk.Notebook):
         self.connect('switch-page', self.deferred_on_tab_switch)
         self.connect('scroll-event', self.on_scroll_event)
         self.connect('create-window', self.create_window_detach)
+        self.connect_after('drag-failed', self.on_tab_drag_failed)
         self.configure()
 
         self.set_can_focus(False)
@@ -79,21 +80,37 @@ class Notebook(Container, Gtk.Notebook):
         self.last_active_term = {}
 
     def create_window_detach(self, notebook, widget, x, y):
-        """Create a window to contain a detached tab"""
-        dbg('creating window for detached tab: %s' % widget)
-        maker = Factory()
+        """Defer detaching a dropped tab until the drag has ended"""
+        dbg('deferring detach of dropped tab: %s' % widget)
+        GObject.idle_add(self.detach_tab_to_new_window, widget, x, y)
 
+    def detach_tab_to_new_window(self, widget, x=None, y=None):
+        """Detach the tab containing widget into a newly created window"""
+        child = self.find_tab_root(widget)
+        if self.page_num(child) == -1:
+            err('could not find tab to detach for %s' % widget)
+            return False
+
+        dbg('detaching tab into new window: %s' % child)
+        maker = Factory()
         window = maker.make('Window')
-        window.move(x, y)
+        if x is not None and y is not None:
+            window.move(x, y)
         size = self.window.get_size()
         window.resize(size.width, size.height)
 
-        self.detach_tab(widget)
-        self.disconnect_child(widget)
+        self.detach_tab(child)
+        self.disconnect_child(child)
         self.hoover()
-        window.add(widget)
+        window.add(child)
 
         window.show_all()
+        return False
+
+    def on_tab_drag_failed(self, notebook, context, result):
+        """Re-allocate after a failed tab drag so the label repaints"""
+        GObject.idle_add(self.queue_resize)
+        return False
 
     def create_layout(self, layout):
         """Apply layout configuration"""
@@ -290,6 +307,7 @@ class Notebook(Container, Gtk.Notebook):
                    'group-tab-toggle': top_window.group_tab_toggle,
                    'ungroup-tab': top_window.ungroup_tab,
                    'move-tab': top_window.move_tab,
+                   'detach-tab': top_window.detach_tab_to_new_window,
                    'tab-new': [top_window.tab_new, widget],
                    'navigate': top_window.navigate_terminal,
                    'zoom': top_window.zoom,
