@@ -924,7 +924,15 @@ class Terminal(Gtk.VBox):
             elif self.config['scrollbar_position'] == 'right':
                 self.terminalbox.reorder_child(self.vte, 0)
 
-        self.titlebar.update()
+        toplevel = self.get_toplevel()
+        if isinstance(toplevel, Gtk.Window) and toplevel.has_toplevel_focus():
+            focused = self.terminator.get_focussed_terminal()
+            if focused is None:
+                focused = self.terminator.last_focused_term
+            self.titlebar.update(focused or self)
+        else:
+            self.titlebar.update('window-focus-out')
+
         self.vte.queue_draw()
 
     def set_cursor_color(self):
