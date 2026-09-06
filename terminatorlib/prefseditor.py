@@ -765,6 +765,9 @@ class PrefsEditor:
             # default to stretch_and_fill
             widget.set_active(0)
 
+        widget = guiget('background_image_span_window_checkbutton')
+        widget.set_active(self.config['background_image_span_window'])
+
         widget = guiget('background_image_align_horiz_combobox')
         if self.config['background_image_align_horiz'] == 'center':
             widget.set_active(1)
@@ -1120,6 +1123,10 @@ class PrefsEditor:
         else:
             value = 'stretch_and_fill'
         self.config['background_image_mode'] = value
+        self.config.save()
+
+    def on_background_image_span_window_checkbutton_toggled(self, widget):
+        self.config['background_image_span_window'] = widget.get_active()
         self.config.save()
 
     def on_background_image_align_horiz_changed(self, widget):
@@ -1786,6 +1793,7 @@ class PrefsEditor:
 
         # toggle sensitivity of widgets related to background image
         for element in ('background_image_file',
+                        'background_image_span_window_checkbutton',
                         'background_image_align_horiz_combobox',
                         'background_image_align_vert_combobox',
                         'background_image_mode_combobox'):

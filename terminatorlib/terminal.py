@@ -1285,7 +1285,16 @@ class Terminal(Gtk.VBox):
         image_align_horiz = self.config['background_image_align_horiz']
         image_align_vert = self.config['background_image_align_vert']
 
-        rect = self.vte.get_allocation()
+        rect = widget.get_allocation()
+        origin_x = 0
+        origin_y = 0
+        if self.config['background_image_span_window']:
+            toplevel = widget.get_toplevel()
+            translated = widget.translate_coordinates(toplevel, 0, 0)
+            if translated:
+                rect = toplevel.get_allocation()
+                origin_x, origin_y = translated
+
         xratio = float(rect.width) / float(self.background_image.get_width())
         yratio = float(rect.height) / float(self.background_image.get_height())
         if image_mode == 'stretch_and_fill':
@@ -1302,17 +1311,19 @@ class Terminal(Gtk.VBox):
             xratio = yratio = 1
         cr.scale(xratio, yratio)
 
-        xoffset = 0
-        yoffset = 0
+        xoffset = -origin_x / xratio
+        yoffset = -origin_y / yratio
         if image_align_horiz == 'center':
-            xoffset = (rect.width / xratio - self.background_image.get_width()) / 2
+            xoffset += (rect.width / xratio -
+                        self.background_image.get_width()) / 2
         elif image_align_horiz == 'right':
-            xoffset = rect.width / xratio - self.background_image.get_width()
+            xoffset += rect.width / xratio - self.background_image.get_width()
 
         if image_align_vert == 'middle':
-            yoffset = (rect.height / yratio - self.background_image.get_height()) / 2
+            yoffset += (rect.height / yratio -
+                        self.background_image.get_height()) / 2
         elif image_align_vert == 'bottom':
-            yoffset = rect.height / yratio - self.background_image.get_height()
+            yoffset += rect.height / yratio - self.background_image.get_height()
 
         cr.set_source_surface(self.background_image, xoffset, yoffset)
         cr.get_source().set_filter(cairo.Filter.FAST)
